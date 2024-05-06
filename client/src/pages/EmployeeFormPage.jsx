@@ -20,8 +20,8 @@ export function EmployeeFormPage() {
         // Asegúrate de que las fechas estén en el formato correcto antes de enviarlas
         const formattedData = {
             ...data,
-            birthdate: birthdate.toISOString().split('T')[0],  // Convierte la fecha a formato 'YYYY-MM-DD'
-            hiredate: hiredate.toISOString().split('T')[0],  // Convierte la fecha a formato 'YYYY-MM-DD'
+            birthdate: birthdate.toISOString(),  // Convierte la fecha a formato 'YYYY-MM-DD'
+            hiredate: hiredate.toISOString(),  // Convierte la fecha a formato 'YYYY-MM-DD'
         };
         try {
             if (editMode) {
@@ -85,16 +85,20 @@ export function EmployeeFormPage() {
                     selected={birthdate}
                     onChange={(date) => setBirthdate(date)}
                     placeholderText={intl.formatMessage({ id: "birthdate", defaultMessage: "Birth Date" })}
+                    showTimeSelect  // Muestra el selector de hora
+                    dateFormat="yyyy-MM-dd HH:mm"  // Formato de fecha y hora
                     className='bg-zinc-700 p-3 rounded-lg block w-full mb-3'
                 />
                 {errors.birthdate && <span>this field is required</span>}
+                {/* DatePicker para la fecha de contratación */}
                 <DatePicker
                     selected={hiredate}
                     onChange={(date) => setHiredate(date)}
                     placeholderText={intl.formatMessage({ id: "hiredate", defaultMessage: "Hire Date" })}
+                    showTimeSelect  // Muestra el selector de hora
+                    dateFormat="yyyy-MM-dd HH:mm"  // Formato de fecha y hora
                     className='bg-zinc-700 p-3 rounded-lg block w-full mb-3'
                 />
-                {errors.hiredate && <span>this field is required</span>}
                 {errors.hiredate && <span>this field is required</span>}
                 <input type="text" placeholder={intl.formatMessage({ id: "address", defaultMessage: "Address" })} {...register("address", { required: true })} className='bg-zinc-700 p-3 rounded-lg block w-full mb-3' />
                 {errors.address && <span>this field is required</span>}
@@ -120,7 +124,6 @@ export function EmployeeFormPage() {
                 {errors.photopath && <span>this field is required</span>}
                 <button className='bg-indigo-500 p-3 rounded-lg block w-full mt-3'>Save</button>
             </form>
-        </div>
-    )
+        </div>
+    )
 }
-
