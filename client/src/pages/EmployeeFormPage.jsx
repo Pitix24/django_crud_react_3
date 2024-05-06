@@ -26,8 +26,8 @@ export function EmployeeFormPage() {
     // Asegúrate de que las fechas estén en el formato correcto antes de enviarlas
     const formattedData = {
       ...data,
-      birthdate: birthdate.toISOString(), // Convierte la fecha a formato 'YYYY-MM-DD'
-      hiredate: hiredate.toISOString(), // Convierte la fecha a formato 'YYYY-MM-DD'
+      birthdate: birthdate ? birthdate.toISOString() : null, // Convierte la fecha a formato 'YYYY-MM-DD'
+      hiredate: hiredate ? hiredate.toISOString() : null, // Convierte la fecha a formato 'YYYY-MM-DD'
     };
     try {
       if (editMode) {
@@ -162,7 +162,7 @@ export function EmployeeFormPage() {
           dateFormat="yyyy-MM-dd HH:mm" // Formato de fecha y hora
           className="bg-zinc-700 p-3 rounded-lg block w-full mb-3"
         />
-        {errors.birthdate && <span>this field is required</span>}
+
         {/* DatePicker para la fecha de contratación */}
         <DatePicker
           selected={hiredate}
@@ -175,7 +175,6 @@ export function EmployeeFormPage() {
           dateFormat="yyyy-MM-dd HH:mm" // Formato de fecha y hora
           className="bg-zinc-700 p-3 rounded-lg block w-full mb-3"
         />
-        {errors.hiredate && <span>this field is required</span>}
         <input
           type="text"
           placeholder={intl.formatMessage({
