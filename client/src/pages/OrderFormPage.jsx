@@ -1,6 +1,6 @@
 import { useEffect, useState, useCallback } from 'react'
 import { useForm } from 'react-hook-form';
-import { createOrder, updateOrder, getOrder, getAllCustomerIds, getAllEmployeeIds } from '../api/crud.api';
+import { createOrder, updateOrder, getOrder, getAllCustomerIds, getAllEmployeeIds, getAllShipperIds } from '../api/crud.api';
 import { useNavigate, useParams } from 'react-router-dom';
 import { toast } from 'react-hot-toast';
 import { useIntl, FormattedMessage } from 'react-intl';
@@ -14,9 +14,9 @@ export function OrderFormPage() {
     const navigate = useNavigate();
     const params = useParams();
     const [editMode, setEditMode] = useState(false);
-    const [shippers, setShippers] = useState([]);
     const [customerIds, setCustomerIds] = useState([]);
     const [employeeIds, setEmployeeIds] = useState([]);
+    const [shipperIds, setShipperIds] = useState([]);
     const [orderDate, setOrderDate] = useState(null);
     const [requiredDate, setRequiredDate] = useState(null);
     const [shippedDate, setShippedDate] = useState(null);
@@ -76,12 +76,15 @@ export function OrderFormPage() {
     }, [loadOrder]);
 
     useEffect(() => {
-        setShippers([
-            { id: 1, name: 'Speedy Express' },
-            { id: 2, name: 'United Package' },
-            { id: 3, name: 'Federal Shipping' }
-        ]);
+        // Llamar a la función para obtener los IDs de los envíos cuando el componente se monte
+        getAllShipperIds()
+            .then(ids => {
+                console.log('Shipper IDs:', ids);
+                setShipperIds(ids);
+            })
+            .catch(error => console.error('Error fetching shipper IDs:', error));
     }, []);
+    
 
     useEffect(() => {
         // Llamar a la función para obtener los customerid cuando el componente se monte
@@ -149,8 +152,10 @@ export function OrderFormPage() {
                     />
                     {errors.shippeddate && <span><FormattedMessage id="fieldRequired" defaultMessage="This field is required" /></span>}
                 <select defaultValue="" {...register("shipvia", { required: true })} className='bg-zinc-700 p-3 rounded-lg block w-full mb-3'>
-                <option value="" disabled>{intl.formatMessage({ id: "shipvia", defaultMessage: "Select Ship Via" })}</option>
-                {shippers.map(shipper => <option key={shipper.id} value={shipper.id}>{shipper.name}</option>)}
+                    <option value="" disabled>{intl.formatMessage({ id: "shipvia", defaultMessage: "Select Ship Via" })}</option>
+                    {shipperIds.map(id => (
+                        <option key={id} value={id}>{id}</option>
+                    ))}
                 </select>
                 {errors.shipvia && <span><FormattedMessage id="fieldRequired" defaultMessage="This field is required" /></span>}
                 <input type="text" placeholder={intl.formatMessage({ id: "freight", defaultMessage: "Freight" })} {...register("freight", { required: true })} className='bg-zinc-700 p-3 rounded-lg block w-full mb-3' />
@@ -172,6 +177,6 @@ export function OrderFormPage() {
         </div>
         <br></br>
         <Footer />
-        </>
-    )
+        </>
+    )
 }

@@ -28,6 +28,10 @@ const categoryApi = axios.create({
     baseURL: 'http://localhost:8000/app_crud/api/v1/categories/'
 });
 
+const shipperApi = axios.create({
+    baseURL: 'http://localhost:8000/app_crud/api/v1/shippers/'
+});
+
 // customers
 export const getAllCustomers = () => customerApi.get("/");
 
@@ -159,6 +163,20 @@ export const getAllCategoryIds = async () => {
         return categoryIds;
     } catch (error) {
         console.error('Error fetching category IDs:', error);
+        throw error;
+    }
+};
+
+// shippers
+export const getAllShipperIds = async () => {
+    try {
+        const response = await shipperApi.get('/'); // Asegúrate de que la ruta sea la correcta
+        const shipperIds = response.data.map(shipper => shipper.shipperid);
+        console.log('Shipper IDs:', shipperIds);
+
+        return shipperIds;
+    } catch (error) {
+        console.error('Error fetching shipper IDs:', error);
         throw error;
     }
 };
