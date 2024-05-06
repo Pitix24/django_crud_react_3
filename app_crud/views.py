@@ -34,3 +34,7 @@ class SupplierView(viewsets.ModelViewSet):
 class CategorieView(viewsets.ModelViewSet):
     serializer_class = CategorieSerializer
     queryset = Categories.objects.all()
+
+class ShipperView(viewsets.ModelViewSet):
+    serializer_class = ShipperSerializer
+    queryset = Shippers.objects.all()    

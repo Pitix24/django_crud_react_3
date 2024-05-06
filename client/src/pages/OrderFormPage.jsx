@@ -1,9 +1,11 @@
 import { useEffect, useState, useCallback } from 'react'
 import { useForm } from 'react-hook-form';
-import { createOrder, updateOrder, getOrder, getAllCustomerIds, getAllEmployeeIds } from '../api/crud.api';
+import { createOrder, updateOrder, getOrder, getAllCustomerIds, getAllEmployeeIds, getAllShipperIds } from '../api/crud.api';
 import { useNavigate, useParams } from 'react-router-dom';
 import { toast } from 'react-hot-toast';
 import { useIntl, FormattedMessage } from 'react-intl';
+import DatePicker from 'react-datepicker';
+import 'react-datepicker/dist/react-datepicker.css';
 import Footer from '../components/Footer';
 
 export function OrderFormPage() {
@@ -12,11 +14,21 @@ export function OrderFormPage() {
     const navigate = useNavigate();
     const params = useParams();
     const [editMode, setEditMode] = useState(false);
-    const [shippers, setShippers] = useState([]);
     const [customerIds, setCustomerIds] = useState([]);
     const [employeeIds, setEmployeeIds] = useState([]);
+    const [shipperIds, setShipperIds] = useState([]);
+    const [orderDate, setOrderDate] = useState(null);
+    const [requiredDate, setRequiredDate] = useState(null);
+    const [shippedDate, setShippedDate] = useState(null);
 
     const onSubmit = handleSubmit(async (data) => {
+        // Asegúrate de que las fechas estén en el formato correcto antes de enviarlas
+        const formattedData = {
+            ...data,
+            OrderDate: orderDate.toISOString(),
+            RequiredDate: requiredDate.toISOString(),
+            ShippedDate: shippedDate.toISOString()
+        };
         try {
             if (editMode) {
                 await updateOrder(params.orderid, data);
@@ -50,7 +62,6 @@ export function OrderFormPage() {
                 for (let field in data) {
                     setValue(field, data[field]);
                 }
-                setEditMode(true);
             } catch (error) {
                 console.error("Error loading order: ", error);
             }
@@ -65,12 +76,15 @@ export function OrderFormPage() {
     }, [loadOrder]);
 
     useEffect(() => {
-        setShippers([
-            { id: 1, name: 'Speedy Express' },
-            { id: 2, name: 'United Package' },
-            { id: 3, name: 'Federal Shipping' }
-        ]);
+        // Llamar a la función para obtener los IDs de los envíos cuando el componente se monte
+        getAllShipperIds()
+            .then(ids => {
+                console.log('Shipper IDs:', ids);
+                setShipperIds(ids);
+            })
+            .catch(error => console.error('Error fetching shipper IDs:', error));
     }, []);
+    
 
     useEffect(() => {
         // Llamar a la función para obtener los customerid cuando el componente se monte
@@ -95,8 +109,6 @@ export function OrderFormPage() {
         <>
         <div className='max-w-xl mx-auto mt-12 mb-12'>
             <form onSubmit={onSubmit}>
-                <input type="text" placeholder={intl.formatMessage({ id: "orderid", defaultMessage: "Order ID" })} {...register("orderid", { required: true })} className='bg-zinc-700 p-3 rounded-lg block w-full mb-3' />
-                {errors.orderid && <span><FormattedMessage id="fieldRequired" defaultMessage="This field is required" /></span>}
                 <select defaultValue="" {...register("customerid", { required: true })} className='bg-zinc-700 p-3 rounded-lg block w-full mb-3'>
                 <option value="" disabled>{intl.formatMessage({ id: "customerid", defaultMessage: "Select Customer ID" })}</option>
                 {customerIds.map(id => (<option key={id} value={id}>{id}</option>))}
@@ -107,15 +119,41 @@ export function OrderFormPage() {
                 {employeeIds.map(id => (<option key={id} value={id}>{id}</option>))}
                 </select>
                 {errors.employeeid && <span><FormattedMessage id="fieldRequired" defaultMessage="This field is required" /></span>}
-                <input type="text" placeholder={intl.formatMessage({ id: "orderdate", defaultMessage: "Order Date" })} {...register("orderdate", { required: true })} className='bg-zinc-700 p-3 rounded-lg block w-full mb-3' />
-                {errors.orderdate && <span><FormattedMessage id="fieldRequired" defaultMessage="This field is required" /></span>}
-                <input type="text" placeholder={intl.formatMessage({ id: "requireddate", defaultMessage: "Required Date" })} {...register("requireddate", { required: true })} className='bg-zinc-700 p-3 rounded-lg block w-full mb-3' />
-                {errors.requireddate && <span><FormattedMessage id="fieldRequired" defaultMessage="This field is required" /></span>}
-                <input type="text" placeholder={intl.formatMessage({ id: "shippeddate", defaultMessage: "Shipped Date" })} {...register("shippeddate", { required: true })} className='bg-zinc-700 p-3 rounded-lg block w-full mb-3' />
-                {errors.shippeddate && <span><FormattedMessage id="fieldRequired" defaultMessage="This field is required" /></span>}
+                
+                <DatePicker
+                        selected={orderDate}
+                        onChange={(date) => setOrderDate(date)}
+                        placeholderText={intl.formatMessage({ id: "orderdate", defaultMessage: "Order Date" })}
+                        showTimeSelect  // Muestra el selector de hora
+                        dateFormat="yyyy-MM-dd HH:mm"  // Formato de fecha y hora
+                        className='bg-zinc-700 p-3 rounded-lg block w-full mb-3'
+                    />
+                    {errors.orderdate && <span><FormattedMessage id="fieldRequired" defaultMessage="This field is required" /></span>}
+                    {/* DatePicker para la fecha requerida */}
+                    <DatePicker
+                        selected={requiredDate}
+                        onChange={(date) => setRequiredDate(date)}
+                        placeholderText={intl.formatMessage({ id: "requireddate", defaultMessage: "Required Date" })}
+                        showTimeSelect  // Muestra el selector de hora
+                        dateFormat="yyyy-MM-dd HH:mm"  // Formato de fecha y hora
+                        className='bg-zinc-700 p-3 rounded-lg block w-full mb-3'
+                    />
+                    {errors.requireddate && <span><FormattedMessage id="fieldRequired" defaultMessage="This field is required" /></span>}
+                    {/* DatePicker para la fecha enviada */}
+                    <DatePicker
+                        selected={shippedDate}
+                        onChange={(date) => setShippedDate(date)}
+                        placeholderText={intl.formatMessage({ id: "shippeddate", defaultMessage: "Shipped Date" })}
+                        showTimeSelect  // Muestra el selector de hora
+                        dateFormat="yyyy-MM-dd HH:mm"  // Formato de fecha y hora
+                        className='bg-zinc-700 p-3 rounded-lg block w-full mb-3'
+                    />
+                    {errors.shippeddate && <span><FormattedMessage id="fieldRequired" defaultMessage="This field is required" /></span>}
                 <select defaultValue="" {...register("shipvia", { required: true })} className='bg-zinc-700 p-3 rounded-lg block w-full mb-3'>
-                <option value="" disabled>{intl.formatMessage({ id: "shipvia", defaultMessage: "Select Ship Via" })}</option>
-                {shippers.map(shipper => <option key={shipper.id} value={shipper.id}>{shipper.name}</option>)}
+                    <option value="" disabled>{intl.formatMessage({ id: "shipvia", defaultMessage: "Select Ship Via" })}</option>
+                    {shipperIds.map(id => (
+                        <option key={id} value={id}>{id}</option>
+                    ))}
                 </select>
                 {errors.shipvia && <span><FormattedMessage id="fieldRequired" defaultMessage="This field is required" /></span>}
                 <input type="text" placeholder={intl.formatMessage({ id: "freight", defaultMessage: "Freight" })} {...register("freight", { required: true })} className='bg-zinc-700 p-3 rounded-lg block w-full mb-3' />

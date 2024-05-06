@@ -39,3 +39,8 @@ class CategorieSerializer(serializers.ModelSerializer):
     class Meta:
         model = Categories
         fields = '__all__'
+
+class ShipperSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Shippers
+        fields = '__all__'

@@ -17,7 +17,7 @@ import en from './locales/en.json';
 import es from './locales/es.json';
 
 function App() {
-  const [locale, setLocale] = useState('en'); // Cambia esto para cambiar el idioma
+  const [locale, setLocale] = useState('es'); // Cambia esto para cambiar el idioma
 
   const messages = {
     en: en,
