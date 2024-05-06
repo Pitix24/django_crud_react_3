@@ -109,8 +109,6 @@ export function OrderFormPage() {
         <>
         <div className='max-w-xl mx-auto mt-12 mb-12'>
             <form onSubmit={onSubmit}>
-                <input type="text" placeholder={intl.formatMessage({ id: "orderid", defaultMessage: "Order ID" })} {...register("orderid", { required: true })} className='bg-zinc-700 p-3 rounded-lg block w-full mb-3' />
-                {errors.orderid && <span><FormattedMessage id="fieldRequired" defaultMessage="This field is required" /></span>}
                 <select defaultValue="" {...register("customerid", { required: true })} className='bg-zinc-700 p-3 rounded-lg block w-full mb-3'>
                 <option value="" disabled>{intl.formatMessage({ id: "customerid", defaultMessage: "Select Customer ID" })}</option>
                 {customerIds.map(id => (<option key={id} value={id}>{id}</option>))}
