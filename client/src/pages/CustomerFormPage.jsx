@@ -1,26 +1,29 @@
-import React, { useEffect, useCallback } from "react";
+import { useEffect, useState, useCallback } from "react";
 import { useForm } from "react-hook-form";
-import { createOrder, updateOrder, getOrder } from "../api/crud.api";
+import { createCustomer, updateCustomer, getCustomer } from "../api/crud.api";
 import { useNavigate, useParams } from "react-router-dom";
 import { toast } from "react-hot-toast";
 import { useIntl, FormattedMessage } from "react-intl";
+import Footer from "../components/Footer";
 
-export function OrderFormPage() {
+export function CustomerFormPage() {
   const intl = useIntl();
   const {
     register,
     handleSubmit,
     formState: { errors },
     setValue,
+    reset,
   } = useForm();
   const navigate = useNavigate();
   const params = useParams();
+  const [editMode, setEditMode] = useState(false);
 
   const onSubmit = handleSubmit(async (data) => {
     try {
-      if (params.orderid) {
-        await updateOrder(params.orderid, data);
-        toast.success("Order actualizada exitosamente", {
+      if (editMode) {
+        await updateCustomer(params.customerid, data);
+        toast.success("Customer actualizado exitosamente", {
           position: "bottom-right",
           style: {
             background: "#101010",
@@ -28,8 +31,8 @@ export function OrderFormPage() {
           },
         });
       } else {
-        await createOrder(data);
-        toast.success("Order creada exitosamente", {
+        await createCustomer(data);
+        toast.success("Customer creado exitosamente", {
           position: "bottom-right",
           style: {
             background: "#101010",
@@ -37,256 +40,216 @@ export function OrderFormPage() {
           },
         });
       }
-      navigate("/orders");
+      navigate("/customers");
     } catch (error) {
-      console.error("Error updating/creating order: ", error);
+      console.error("Error updating/creating customer: ", error);
     }
   });
 
-  const loadOrder = useCallback(async () => {
-    if (params.orderid) {
+  const loadCustomer = useCallback(async () => {
+    if (params.customerid) {
       try {
-        const { data } = await getOrder(params.orderid);
+        const { data } = await getCustomer(params.customerid);
         for (let field in data) {
           setValue(field, data[field]);
         }
+        setEditMode(true);
       } catch (error) {
-        console.error("Error loading order: ", error);
+        console.error("Error loading customer: ", error);
       }
+    } else {
+      reset();
+      setEditMode(false);
     }
-  }, [params.orderid, setValue]);
+  }, [params.customerid, setValue, reset]);
 
   useEffect(() => {
-    loadOrder();
-  }, [loadOrder]);
-
-  const handleBack = () => {
-    navigate("/orders");
-  };
+    loadCustomer();
+  }, [loadCustomer]);
 
   return (
-    <div className="max-w-xl mx-auto mt-12">
-      <div className="text-center bg-white py-6 mb-8 rounded-t-lg rounded-b-none">
-        <h1 className="text-4xl font-semibold dark:text-black">Orden</h1>
-      </div>
-      <form onSubmit={onSubmit}>
-        <input
-          type="text"
-          placeholder={intl.formatMessage({
-            id: "orderid",
-            defaultMessage: "Order ID",
-          })}
-          {...register("orderid", {
-            required: true,
-            pattern: /^[0-9]{1,11}$/, // Expresión regular para aceptar solo números y máximo 11 dígitos
-          })}
-          className="bg-zinc-700 p-3 rounded-lg block w-full mb-3"
-        />
-        {errors.orderid && errors.orderid.type === "required" && (
-          <span>this field is required</span>
-        )}
-        {errors.orderid && errors.orderid.type === "pattern" && (
-          <span>Order ID must be a number and maximum of 11 digits</span>
-        )}
-
-        <input
-          type="text"
-          placeholder={intl.formatMessage({
-            id: "customerid",
-            defaultMessage: "Customer ID",
-          })}
-          {...register("customerid", { required: true })}
-          className="bg-zinc-700 p-3 rounded-lg block w-full mb-3"
-        />
-        {errors.customerid && <span>this field is required</span>}
-
-        <input
-          type="text"
-          placeholder={intl.formatMessage({
-            id: "employeeid",
-            defaultMessage: "Employee ID",
-          })}
-          {...register("employeeid", { required: true })}
-          className="bg-zinc-700 p-3 rounded-lg block w-full mb-3"
-        />
-        {errors.employeeid && <span>this field is required</span>}
-
-        <input
-          type="text"
-          placeholder={intl.formatMessage({
-            id: "orderdate",
-            defaultMessage: "Order Date",
-          })}
-          {...register("orderdate", { required: true })}
-          className="bg-zinc-700 p-3 rounded-lg block w-full mb-3"
-        />
-        {errors.orderdate && <span>this field is required</span>}
-        <input
-          type="text"
-          placeholder={intl.formatMessage({
-            id: "requireddate",
-            defaultMessage: "Required Date",
-          })}
-          {...register("requireddate", { required: true })}
-          className="bg-zinc-700 p-3 rounded-lg block w-full mb-3"
-        />
-        {errors.requireddate && <span>this field is required</span>}
-        <input
-          type="text"
-          placeholder={intl.formatMessage({
-            id: "shippeddate",
-            defaultMessage: "Shipped Date",
-          })}
-          {...register("shippeddate", { required: true })}
-          className="bg-zinc-700 p-3 rounded-lg block w-full mb-3"
-        />
-        {errors.shippeddate && <span>this field is required</span>}
-
-        <input
-          type="text"
-          placeholder={intl.formatMessage({
-            id: "shipvia",
-            defaultMessage: "Ship Via",
-          })}
-          {...register("shipvia", {
-            required: true,
-            pattern: /^[0-9]{1,11}$/, // aceptar solo números y máximo de 11 dígitos
-          })}
-          className="bg-zinc-700 p-3 rounded-lg block w-full mb-3"
-        />
-        {errors.shipvia && errors.shipvia.type === "required" && (
-          <span>this field is required</span>
-        )}
-        {errors.shipvia && errors.shipvia.type === "pattern" && (
-          <span>Ship Via must be a number and maximum of 11 digits</span>
-        )}
-
-        <input
-          type="text"
-          placeholder={intl.formatMessage({
-            id: "freight",
-            defaultMessage: "Freight",
-          })}
-          {...register("freight", { required: true })}
-          className="bg-zinc-700 p-3 rounded-lg block w-full mb-3"
-        />
-        {errors.freight && <span>this field is required</span>}
-
-        <input
-          type="text"
-          placeholder={intl.formatMessage({
-            id: "shipname",
-            defaultMessage: "Ship Name",
-          })}
-          {...register("shipname", {
-            required: true,
-            pattern: /^[a-zA-Z0-9\s]{1,40}$/, // Expresión regular para aceptar letras, números y espacios, con un máximo de 40 caracteres
-          })}
-          className="bg-zinc-700 p-3 rounded-lg block w-full mb-3"
-        />
-        {errors.shipname && errors.shipname.type === "required" && (
-          <span>this field is required</span>
-        )}
-        {errors.shipname && errors.shipname.type === "pattern" && (
-          <span>Ship Name must be a maximum of 40 characters</span>
-        )}
-
-        <input
-          type="text"
-          placeholder={intl.formatMessage({
-            id: "shipaddress",
-            defaultMessage: "Ship Address",
-          })}
-          {...register("shipaddress", {
-            required: true,
-            maxLength: 60, // Establece la longitud máxima permitida como 60 caracteres
-          })}
-          className="bg-zinc-700 p-3 rounded-lg block w-full mb-3"
-        />
-        {errors.shipaddress && errors.shipaddress.type === "required" && (
-          <span>this field is required</span>
-        )}
-
-        <input
-          type="text"
-          placeholder={intl.formatMessage({
-            id: "shipcity",
-            defaultMessage: "Ship City",
-          })}
-          {...register("shipcity", {
-            required: true,
-            maxLength: 15, // Establece la longitud máxima permitida como 15 caracteres
-          })}
-          className="bg-zinc-700 p-3 rounded-lg block w-full mb-3"
-        />
-        {errors.shipcity && errors.shipcity.type === "required" && (
-          <span>this field is required</span>
-        )}
-
-        <input
-          type="text"
-          placeholder={intl.formatMessage({
-            id: "shipregion",
-            defaultMessage: "Ship Region",
-          })}
-          {...register("shipregion", {
-            required: true,
-            maxLength: 15, // Establece la longitud máxima permitida como 15 caracteres
-          })}
-          className="bg-zinc-700 p-3 rounded-lg block w-full mb-3"
-        />
-        {errors.shipregion && errors.shipregion.type === "required" && (
-          <span>this field is required</span>
-        )}
-
-        <input
-          type="text"
-          placeholder={intl.formatMessage({
-            id: "shippostalcode",
-            defaultMessage: "Ship Postal Code",
-          })}
-          {...register("shippostalcode", {
-            required: true,
-            maxLength: 10,
-          })}
-          className="bg-zinc-700 p-3 rounded-lg block w-full mb-3"
-        />
-        {errors.shippostalcode && errors.shippostalcode.type === "required" && (
-          <span>this field is required</span>
-        )}
-
-        <input
-          type="text"
-          placeholder={intl.formatMessage({
-            id: "shipcountry",
-            defaultMessage: "Ship Country",
-          })}
-          {...register("shipcountry", {
-            required: true,
-            maxLength: 15,
-          })}
-          className="bg-zinc-700 p-3 rounded-lg block w-full mb-3"
-        />
-        {errors.shipcountry && errors.shipcountry.type === "required" && (
-          <span>this field is required</span>
-        )}
-
-        <div className="flex justify-center space-x-4 mt-6">
-          <button
-            className="bg-indigo-500 p-3 rounded-lg block w-32"
-            type="submit"
-          >
+    <>
+      <div className="max-w-xl mx-auto mt-12 mb-12">
+        <form onSubmit={onSubmit}>
+          <input
+            type="text"
+            placeholder={intl.formatMessage({
+              id: "customerid",
+              defaultMessage: "Customer ID",
+            })}
+            {...register("customerid", {
+              required: true,
+              maxLength: {
+                value: 5,
+                message: "Customer ID must be 5 characters long",
+              },
+              pattern: {
+                value: /^[A-Za-z0-9]+$/,
+                message:
+                  "Customer ID must contain only alphanumeric characters",
+              },
+            })}
+            className="bg-zinc-700 p-3 rounded-lg block w-full mb-3"
+          />
+          {errors.customerid && <span>{errors.customerid.message}</span>}
+          <input
+            type="text"
+            placeholder={intl.formatMessage({
+              id: "companyname",
+              defaultMessage: "Company Name",
+            })}
+            {...register("companyname", {
+              required: { value: true, message: "Company Name is required" },
+              maxLength: {
+                value: 40,
+                message: "Company Name must be 40 characters long or less",
+              },
+            })}
+            className="bg-zinc-700 p-3 rounded-lg block w-full mb-3"
+          />
+          {errors.companyname && <span>{errors.companyname.message}</span>}
+          <input
+            type="text"
+            placeholder={intl.formatMessage({
+              id: "contactname",
+              defaultMessage: "Contact Name",
+            })}
+            {...register("contactname", {
+              maxLength: {
+                value: 30,
+                message: "Contact Name must be 30 characters long or less",
+              },
+            })}
+            className="bg-zinc-700 p-3 rounded-lg block w-full mb-3"
+          />
+          {errors.contactname && <span>{errors.contactname.message}</span>}
+          <input
+            type="text"
+            placeholder={intl.formatMessage({
+              id: "contacttitle",
+              defaultMessage: "Contact Title",
+            })}
+            {...register("contacttitle", {
+              maxLength: {
+                value: 30,
+                message: "Contact Title must be 30 characters long or less",
+              },
+            })}
+            className="bg-zinc-700 p-3 rounded-lg block w-full mb-3"
+          />
+          {errors.contacttitle && <span>{errors.contacttitle.message}</span>}
+          <input
+            type="text"
+            placeholder={intl.formatMessage({
+              id: "address",
+              defaultMessage: "Address",
+            })}
+            {...register("address", {
+              maxLength: {
+                value: 60,
+                message: "Address must be 60 characters long or less",
+              },
+            })}
+            className="bg-zinc-700 p-3 rounded-lg block w-full mb-3"
+          />
+          {errors.address && <span>{errors.address.message}</span>}
+          <input
+            type="text"
+            placeholder={intl.formatMessage({
+              id: "city",
+              defaultMessage: "City",
+            })}
+            {...register("city", {
+              maxLength: {
+                value: 15,
+                message: "City must be 15 characters long or less",
+              },
+            })}
+            className="bg-zinc-700 p-3 rounded-lg block w-full mb-3"
+          />
+          {errors.city && <span>{errors.city.message}</span>}
+          <input
+            type="text"
+            placeholder={intl.formatMessage({
+              id: "region",
+              defaultMessage: "Region",
+            })}
+            {...register("region", {
+              maxLength: {
+                value: 15,
+                message: "Region must be 15 characters long or less",
+              },
+            })}
+            className="bg-zinc-700 p-3 rounded-lg block w-full mb-3"
+          />
+          {errors.region && <span>{errors.region.message}</span>}
+          <input
+            type="text"
+            placeholder={intl.formatMessage({
+              id: "postalcode",
+              defaultMessage: "Postal Code",
+            })}
+            {...register("postalcode", {
+              maxLength: {
+                value: 10,
+                message: "Postal Code must be 10 characters long or less",
+              },
+            })}
+            className="bg-zinc-700 p-3 rounded-lg block w-full mb-3"
+          />
+          {errors.postalcode && <span>{errors.postalcode.message}</span>}
+          <input
+            type="text"
+            placeholder={intl.formatMessage({
+              id: "country",
+              defaultMessage: "Country",
+            })}
+            {...register("country", {
+              maxLength: {
+                value: 15,
+                message: "Country must be 15 characters long or less",
+              },
+            })}
+            className="bg-zinc-700 p-3 rounded-lg block w-full mb-3"
+          />
+          {errors.country && <span>{errors.country.message}</span>}
+          <input
+            type="text"
+            placeholder={intl.formatMessage({
+              id: "phone",
+              defaultMessage: "Phone",
+            })}
+            {...register("phone", {
+              maxLength: {
+                value: 24,
+                message: "Phone must be 24 characters long or less",
+              },
+            })}
+            className="bg-zinc-700 p-3 rounded-lg block w-full mb-3"
+          />
+          {errors.phone && <span>{errors.phone.message}</span>}
+          <input
+            type="text"
+            placeholder={intl.formatMessage({
+              id: "fax",
+              defaultMessage: "Fax",
+            })}
+            {...register("fax", {
+              maxLength: {
+                value: 24,
+                message: "Fax must be 24 characters long or less",
+              },
+            })}
+            className="bg-zinc-700 p-3 rounded-lg block w-full mb-3"
+          />
+          {errors.fax && <span>{errors.fax.message}</span>}
+          <button className="bg-indigo-500 p-3 rounded-lg block w-full mt-3">
             <FormattedMessage id="save" defaultMessage="Save" />
           </button>
-          <button
-            className="bg-blue-500 p-3 rounded-lg block w-32"
-            type="button"
-            onClick={handleBack}
-          >
-            <FormattedMessage id="back" defaultMessage="Volver" />
-          </button>
-        </div>
-      </form>
-    </div>
+        </form>
+      </div>
+      <br></br>
+      <Footer />
+    </>
   );
 }
