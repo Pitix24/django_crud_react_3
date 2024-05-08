@@ -69,8 +69,8 @@
     "unitsonorder": "Units On Order",
     "reorderlevel": "Reorder Level",
     "discontinued": "Discontinued",
-    "Quantity": "Quantity",
-    "Discount": "Discount",
+    "quantity": "Quantity",
+    "discount": "Discount",
     "Orderid": "Order ID",
     "ConsultOrder": "Consult Order",
     "LastName": "Last Name",
@@ -93,4 +93,5 @@
     "Freight": "Freight",
     "OrderDate": "Order Date",
     "RequiredDate": "Required Date"
+
 }

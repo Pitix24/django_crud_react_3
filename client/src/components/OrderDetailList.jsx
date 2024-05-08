@@ -2,15 +2,15 @@ import React, { useState, useEffect, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { getAllOrderDetails, deleteOrderDetail } from "../api/crud.api";
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faEdit, faTrash } from '@fortawesome/free-solid-svg-icons';
+import { faEdit, faTrash, faBook } from '@fortawesome/free-solid-svg-icons';
 import PropTypes from 'prop-types';
 import { FormattedMessage } from 'react-intl';
 
 export function OrderDetailList() {
-    const [orderdetails, setoOrderDetails] = useState([]);
+    const [orderdetails, setOrderDetails] = useState([]);
     const [loading, setLoading] = useState(true);
-    const [searchTerm, setSearchTerm] = useState('');
-    const [notFound, setNotFound] = useState(false); // Nuevo estado para mostrar el mensaje
+    const [searchTerm, setSearchTerm] = useState("");
+    const [notFound, setNotFound] = useState(false); // Estado para controlar si la orden no se encuentra
     const navigate = useNavigate();
 
     useEffect(() => {
@@ -21,23 +21,23 @@ export function OrderDetailList() {
         try {
             setLoading(true);
             const res = await getAllOrderDetails();
-            setoOrderDetails(res.data);
-            setNotFound(false); // Reset notFound state
+            setOrderDetails(res.data);
+            setNotFound(false); // Restablece el estado de orden no encontrada
         } catch (error) {
-            console.error("Error loading orderDetails: ", error);
+            console.error("Error loading order details: ", error);
         } finally {
             setLoading(false);
         }
     }, []);
 
-    const handleDelete = useCallback(async (orderid, productid) => {
-        const accepted = window.confirm("Are you sure you want to delete this order detail?");
+    const handleDelete = useCallback(async (orderid) => {
+        const accepted = window.confirm("Are you sure you want to delete this order?");
         if (accepted) {
             try {
-                await deleteOrderDetail(orderid, productid);
+                await deleteOrderDetail(orderid);
                 // Actualiza el estado local para reflejar la eliminación
-                setoOrderDetails(orderdetails.filter(orderdetail => orderdetail.orderid !== orderid || orderdetail.productid !== productid));
-                toast.success('OrdenDetail eliminado exitosamente', {
+                setOrderDetails(orderdetails.filter(orderdetails => orderdetails.orderid !== orderid));
+                toast.success('Order Detail successfully deleted', {
                     position: "bottom-right",
                     style: {
                         background: "#101010",
@@ -50,9 +50,9 @@ export function OrderDetailList() {
         }
     }, [orderdetails]);
 
-    const filteredOrderDetails = orderdetails.filter(orderdetail =>
-        orderdetail.orderid.toString().toLowerCase().includes(searchTerm.toLowerCase()) ||
-        orderdetail.productid.toString().toLowerCase().includes(searchTerm.toLowerCase())
+    const filteredOrderDetails = orderdetails.filter(orderdetails =>
+        orderdetails.orderid.toString().toLowerCase().includes(searchTerm.toLowerCase()) ||
+        orderdetails.productid.toString().toLowerCase().includes(searchTerm.toLowerCase())
     );
 
     useEffect(() => {
@@ -65,7 +65,7 @@ export function OrderDetailList() {
 
     return (
         <div className="mx-auto max-w-8xl px-4 sm:px-6 lg:px-8">
-            <div className="relative overflow-x-auto sm:rounded-lg mt-5 w-full">
+            <div className="relative overflow-x-auto shadow-md sm:rounded-lg mt-5">
                 <h1 className="text-5xl text-left mb-12">
                     <FormattedMessage id="OrderDetailsList" />
                 </h1>
@@ -80,37 +80,25 @@ export function OrderDetailList() {
                     />
                 </div>
                 {notFound ? (
-                    <div className="text-center text-red-500 font-semibold mb-4">
-                        OrderDetail not found
+                    <div className="text-red-500 text-center font-semibold mb-4">
+                        Order Detail not found
                     </div>
                 ) : null}
                 <div className="w-full text-sm text-left rtl:text-right text-gray-500 dark:text-gray-400" style={{ maxHeight: '550px', overflowY: 'scroll' }}>
-                    <table className="w-full text-sm text-left rtl:text-right text-gray-500 dark:text-gray-400 divide-y divide-gray-600 shadow-md">
+                    <table className="w-full text-sm text-left rtl:text-right text-gray-500 dark:text-gray-400 divide-y divide-gray-600">
                         <thead className="text-xs uppercase bg-white-50">
                             <tr>
-                                <th scope="col" className="px-6 py-3 text-white">
-                                    <FormattedMessage id="Orderid" />
-                                </th>
-                                <th scope="col" className="px-6 py-3 text-white">
-                                    <FormattedMessage id="Productid" />
-                                </th>
-                                <th scope="col" className="px-6 py-3 text-white">
-                                    <FormattedMessage id="UnitPrice" />
-                                </th>
-                                <th scope="col" className="px-6 py-3 text-white">
-                                    <FormattedMessage id="Quantity" />
-                                </th>
-                                <th scope="col" className="px-6 py-3 text-white">
-                                    <FormattedMessage id="Discount" />
-                                </th>
-                                <th scope="col" className="px-6 py-3 text-white">
-                                    <FormattedMessage id="Actions" />
-                                </th>
+                                <th scope="col" className="px-6 py-3 text-white"><FormattedMessage id="Orderid" /></th>
+                                <th scope="col" className="px-6 py-3 text-white"><FormattedMessage id="Productid" /></th>
+                                <th scope="col" className="px-6 py-3 text-white"><FormattedMessage id="UnitPrice" /></th>
+                                <th scope="col" className="px-6 py-3 text-white"><FormattedMessage id="Quantity" /></th>
+                                <th scope="col" className="px-6 py-3 text-white"><FormattedMessage id="Discount" /></th>
+                                <th scope="col" className="px-6 py-3 text-white"><FormattedMessage id="Actions" /></th>
                             </tr>
                         </thead>
                         <tbody className='divide-y divide-gray-600'>
                             {filteredOrderDetails.map(orderdetail => (
-                                <tr key={`${orderdetail.orderid}-${orderdetail.productid}`}>
+                                <tr key={orderdetail.orderid}>
                                     <td scope="row" className="px-6 py-4 text-gray-900 whitespace-nowrap dark:text-white">
                                         {orderdetail.orderid}
                                     </td>
@@ -128,10 +116,13 @@ export function OrderDetailList() {
                                     </td>
                                     <td>
                                         <button onClick={() => navigate(`/orderdetails/${orderdetail.orderid}`)}>
-                                            <FontAwesomeIcon icon={faEdit} className="text-blue-500 ml-7" />
+                                            <FontAwesomeIcon icon={faEdit} className="text-blue-500 ml-4" />
                                         </button>
-                                        <button onClick={() => handleDelete(orderdetail.orderid, orderdetail.productid)}>
-                                            <FontAwesomeIcon icon={faTrash} className="text-red-500 ml-3" />
+                                        <button onClick={() => handleDelete(orderdetail.orderid)}>
+                                            <FontAwesomeIcon icon={faTrash} className="text-red-500 ml-4" />
+                                        </button>
+                                        <button onClick={() => navigate(`/orderdetails/${orderdetail.orderid}`)}> 
+                                            <FontAwesomeIcon icon={faBook} className="text-green-500 ml-3" />
                                         </button>
                                     </td>
                                 </tr>          
@@ -140,7 +131,8 @@ export function OrderDetailList() {
                     </table>
                 </div>
             </div>
-        </div>
+        </div> 
+        
     );
 }
 
@@ -153,3 +145,4 @@ OrderDetailList.propTypes = {
         discount: PropTypes.string.isRequired,
     })),
 };
+

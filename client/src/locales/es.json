@@ -92,7 +92,7 @@
     "OrderDate": "Fecha de Pedido",
     "RequiredDate": "Fecha Requerida",
     "Orderid": "Identificación del Pedido",
-    "Quantity": "Cantidad",
-    "Discount": "Descuento",
+    "quantity": "Cantidad",
+    "discount": "Descuento",
     "OrderDetailsList": "Lista de detalles del pedido"
 }
