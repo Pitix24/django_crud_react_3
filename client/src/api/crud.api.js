@@ -107,13 +107,14 @@ export const getAllOrderIds = async () => {
 // orderdetails
 export const getAllOrderDetails = () => orderDetailApi.get("/");
 
-export const getOrderDetail = (orderid, productid) => orderDetailApi.get(`/${orderid}/${productid}/`);
+export const getOrderDetail= (orderid, ) => orderDetailApi.get(`/${orderid}/`);
 
-export const createOrderDetail = (orderid, productid, orderdetail) => orderDetailApi.post(`/${orderid}/${productid}/`, orderdetail);
+export const createOrderDetail = (orderDetailData) => orderDetailApi.post("/", orderDetailData);
 
-export const deleteOrderDetail = (orderid, productid) => orderDetailApi.delete(`/${orderid}/${productid}`);
+export const deleteOrderDetail= (orderid ) => orderDetailApi.delete(`/${orderid}/`);
 
-export const updateOrderDetail = (orderid, productid, orderdetail) => orderDetailApi.put(`/${orderid}/${productid}/`, orderdetail);
+export const updateOrderDetail = (orderid, orderdetail) => orderDetailApi.put(`/${orderid}/`, orderdetail);
+
 
 // products
 export const getAllProducts = () => productApi.get("/");
